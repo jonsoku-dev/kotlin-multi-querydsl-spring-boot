@@ -1,13 +1,19 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    val kotlinVersion = "1.4.21"
     id("org.springframework.boot") version "2.4.1"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.4.30-M1" apply false
-    id("org.jetbrains.kotlin.plugin.noarg") version "1.4.30-M1" apply false
-    id("org.jetbrains.kotlin.kapt") version "1.4.30-M1" apply false
-    kotlin("jvm") version "1.4.21"
-    kotlin("plugin.spring") version "1.4.21"
+    id("org.jetbrains.kotlin.jvm") version kotlinVersion
+    id("org.jetbrains.kotlin.kapt") version kotlinVersion
+    id("org.jetbrains.kotlin.plugin.allopen") version kotlinVersion apply false
+    id("org.jetbrains.kotlin.plugin.noarg") version kotlinVersion apply false
+    id("com.ewerk.gradle.plugins.querydsl") version "1.0.10" apply false
+    kotlin("plugin.spring") version kotlinVersion
+    kotlin("plugin.jpa") version kotlinVersion
+
+    idea
 }
 
 allprojects {
@@ -20,14 +26,13 @@ allprojects {
 subprojects {
     apply {
         plugin("kotlin")
+        plugin("kotlin-kapt")
         plugin("kotlin-spring")
         plugin("kotlin-jpa")
-        plugin("idea")
         plugin("org.springframework.boot")
         plugin("io.spring.dependency-management")
-        plugin( "org.jetbrains.kotlin.plugin.allopen")
-        plugin( "org.jetbrains.kotlin.plugin.noarg")
-        plugin("org.jetbrains.kotlin.kapt")
+        plugin("org.jetbrains.kotlin.plugin.allopen")
+        plugin("org.jetbrains.kotlin.plugin.noarg")
     }
 
     group = "com.tamastudy"
@@ -39,16 +44,13 @@ subprojects {
      * 공통으로 사용될 것들은 여기에 정의를 해놓으면 프로젝트별로 따로 정해주지 않아도 된다.
      */
     dependencies {
+        implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.21")
         implementation("org.springframework.boot:spring-boot-configuration-processor")
         implementation("org.springframework.boot:spring-boot-starter")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-        compileOnly("org.springframework.boot:spring-boot-configuration-processor")
-        compileOnly("org.projectlombok:lombok")
-        annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-        annotationProcessor("org.projectlombok:lombok")
-        developmentOnly("org.springframework.boot:spring-boot-devtools")
+        implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.8")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 
@@ -65,9 +67,22 @@ subprojects {
 }
 
 project("common") {
+//    sourceSets["main"].withConvention(KotlinSourceSet::class) {
+//        kotlin.srcDir("build/generated/source/kapt/main")
+//        println(kotlin.srcDirs)
+//    }
+
+    apply {
+        plugin("com.ewerk.gradle.plugins.querydsl")
+        plugin("idea")
+    }
+
     dependencies{
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         runtimeOnly("mysql:mysql-connector-java")
+
+        compileOnly("com.querydsl:querydsl-jpa:4.2.1")
+        kapt("com.querydsl:querydsl-apt:4.2.1:jpa")
     }
 
     val jar: Jar by tasks
@@ -76,6 +91,13 @@ project("common") {
     bootJar.enabled = false
     jar.enabled = true
 
+    idea {
+        module {
+            val kaptMain = file("build/generated/source/kapt/main")
+            sourceDirs.add(kaptMain)
+            generatedSourceDirs.add(kaptMain)
+        }
+    }
 }
 
 project("api") {
