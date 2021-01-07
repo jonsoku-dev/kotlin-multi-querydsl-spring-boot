@@ -34,12 +34,21 @@ subprojects {
     version = "0.0.1-SNAPSHOT"
     java.sourceCompatibility = JavaVersion.VERSION_1_8
 
+    /**
+     * 서브모듈들에서 공통으로 사용될 dependency
+     * 공통으로 사용될 것들은 여기에 정의를 해놓으면 프로젝트별로 따로 정해주지 않아도 된다.
+     */
     dependencies {
         implementation("org.springframework.boot:spring-boot-configuration-processor")
-        compileOnly("org.springframework.boot:spring-boot-configuration-processor")
         implementation("org.springframework.boot:spring-boot-starter")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+        compileOnly("org.springframework.boot:spring-boot-configuration-processor")
+        compileOnly("org.projectlombok:lombok")
+        annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+        annotationProcessor("org.projectlombok:lombok")
+        developmentOnly("org.springframework.boot:spring-boot-devtools")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 
@@ -65,10 +74,7 @@ project("common") {
 
     dependencies{
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-        implementation("org.jetbrains.kotlin:kotlin-reflect")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         runtimeOnly("mysql:mysql-connector-java")
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 }
 
@@ -79,15 +85,11 @@ project("api") {
         implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
         implementation("org.springframework.boot:spring-boot-starter-validation")
         implementation("org.springframework.boot:spring-boot-starter-web")
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-        implementation("org.jetbrains.kotlin:kotlin-reflect")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity5")
-        compileOnly("org.projectlombok:lombok")
-        developmentOnly("org.springframework.boot:spring-boot-devtools")
-        annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-        annotationProcessor("org.projectlombok:lombok")
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.springframework.security:spring-security-test")
     }
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
 }
