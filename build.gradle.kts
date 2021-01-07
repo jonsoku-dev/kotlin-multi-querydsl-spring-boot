@@ -65,6 +65,10 @@ subprojects {
 }
 
 project("common") {
+    dependencies{
+        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+        runtimeOnly("mysql:mysql-connector-java")
+    }
 
     val jar: Jar by tasks
     val bootJar: org.springframework.boot.gradle.tasks.bundling.BootJar by tasks
@@ -72,10 +76,6 @@ project("common") {
     bootJar.enabled = false
     jar.enabled = true
 
-    dependencies{
-        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-        runtimeOnly("mysql:mysql-connector-java")
-    }
 }
 
 project("api") {
